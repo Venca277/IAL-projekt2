@@ -68,7 +68,8 @@ void ht_insert(ht_table_t *table, char *key, float value) {
   if (found == NULL) {
     ht_item_t *new = (ht_item_t *)malloc(sizeof(ht_item_t));
     new->value = value;
-    new->key = strdup(key);
+    new->key = malloc(strlen(key) + 1);
+    strcpy(new->key, key);
     new->next = (*table)[get_hash(key)];
     (*table)[get_hash(key)] = new;
   } else
@@ -100,7 +101,26 @@ float *ht_get(ht_table_t *table, char *key) {
  *
  * Při implementaci NEPOUŽÍVEJTE funkci ht_search.
  */
-void ht_delete(ht_table_t *table, char *key) {}
+void ht_delete(ht_table_t *table, char *key) {
+  int index = get_hash(key);
+  ht_item_t *current = (*table)[index];
+  ht_item_t *prev = NULL;
+
+  while (current != NULL) {
+    if (strcmp(current->key, key) == 0) {
+      if (prev == NULL) {
+        (*table)[index] = current->next;
+      } else {
+        prev->next = current->next;
+      }
+      free(current->key);
+      free(current);
+      return;
+    }
+    prev = current;
+    current = current->next;
+  }
+}
 
 /*
  * Smazání všech prvků z tabulky.
@@ -108,4 +128,15 @@ void ht_delete(ht_table_t *table, char *key) {}
  * Funkce korektně uvolní všechny alokované zdroje a uvede tabulku do stavu po
  * inicializaci.
  */
-void ht_delete_all(ht_table_t *table) {}
+void ht_delete_all(ht_table_t *table) {
+  for (int i = 0; i < HT_SIZE; i++) {
+    ht_item_t *current = (*table)[i];
+    while (current != NULL) {
+      ht_item_t *next_item = current->next;
+      free(current->key);
+      free(current);
+      current = next_item;
+    }
+    (*table)[i] = NULL;
+  }
+}
