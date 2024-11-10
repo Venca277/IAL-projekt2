@@ -19,21 +19,32 @@
  * leak). Protože neinicializovaný ukazatel má nedefinovanou hodnotu, není
  * možné toto detekovat ve funkci.
  */
-void bst_init(bst_node_t **tree)
-{
-}
+void bst_init(bst_node_t **tree) { *tree = NULL; }
 
 /*
  * Vyhledání uzlu v stromu.
  *
  * V případě úspěchu vrátí funkce hodnotu true a do proměnné value zapíše
- * ukazatel na obsah daného uzlu. V opačném případě funkce vrátí hodnotu false a proměnná
- * value zůstává nezměněná.
+ * ukazatel na obsah daného uzlu. V opačném případě funkce vrátí hodnotu false a
+ * proměnná value zůstává nezměněná.
  *
  * Funkci implementujte iterativně bez použité vlastních pomocných funkcí.
  */
-bool bst_search(bst_node_t *tree, char key, bst_node_content_t **value)
-{
+bool bst_search(bst_node_t *tree, char key, bst_node_content_t **value) {
+  if (tree == NULL)
+    return false;
+
+  if (tree->key == key) {
+    *value = &(tree->content);
+    return true;
+  }
+
+  if (key < tree->key) {
+    return bst_search(tree->left, key, value);
+  } else if (key > tree->key) {
+    return bst_search(tree->right, key, value);
+  }
+
   return false;
 }
 
@@ -48,8 +59,15 @@ bool bst_search(bst_node_t *tree, char key, bst_node_content_t **value)
  *
  * Funkci implementujte iterativně bez použití vlastních pomocných funkcí.
  */
-void bst_insert(bst_node_t **tree, char key, bst_node_content_t value)
-{
+void bst_insert(bst_node_t **tree, char key, bst_node_content_t value) {
+  if (*tree == NULL) {
+    *tree = (bst_node_t *)malloc(sizeof(bst_node_t));
+    (*tree)->key = key;
+    (*tree)->content = value;
+    (*tree)->left = NULL;
+    (*tree)->right = NULL;
+    return;
+  }
 }
 
 /*
@@ -65,9 +83,7 @@ void bst_insert(bst_node_t **tree, char key, bst_node_content_t value)
  *
  * Funkci implementujte iterativně bez použití vlastních pomocných funkcí.
  */
-void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree)
-{
-}
+void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {}
 
 /*
  * Odstranění uzlu ze stromu.
@@ -82,9 +98,7 @@ void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree)
  * Funkci implementujte iterativně pomocí bst_replace_by_rightmost a bez
  * použití vlastních pomocných funkcí.
  */
-void bst_delete(bst_node_t **tree, char key)
-{
-}
+void bst_delete(bst_node_t **tree, char key) {}
 
 /*
  * Zrušení celého stromu.
@@ -96,22 +110,20 @@ void bst_delete(bst_node_t **tree, char key)
  * Funkci implementujte iterativně s pomocí zásobníku a bez použití
  * vlastních pomocných funkcí.
  */
-void bst_dispose(bst_node_t **tree)
-{
-}
+void bst_dispose(bst_node_t **tree) {}
 
 /*
  * Pomocná funkce pro iterativní preorder.
  *
  * Prochází po levé větvi k nejlevějšímu uzlu podstromu.
- * Nad zpracovanými uzly zavolá bst_add_node_to_items a uloží je do zásobníku uzlů.
+ * Nad zpracovanými uzly zavolá bst_add_node_to_items a uloží je do zásobníku
+ * uzlů.
  *
  * Funkci implementujte iterativně s pomocí zásobníku a bez použití
  * vlastních pomocných funkcí.
  */
-void bst_leftmost_preorder(bst_node_t *tree, stack_bst_t *to_visit, bst_items_t *items)
-{
-}
+void bst_leftmost_preorder(bst_node_t *tree, stack_bst_t *to_visit,
+                           bst_items_t *items) {}
 
 /*
  * Preorder průchod stromem.
@@ -121,9 +133,7 @@ void bst_leftmost_preorder(bst_node_t *tree, stack_bst_t *to_visit, bst_items_t 
  * Funkci implementujte iterativně pomocí funkce bst_leftmost_preorder a
  * zásobníku uzlů a bez použití vlastních pomocných funkcí.
  */
-void bst_preorder(bst_node_t *tree, bst_items_t *items)
-{
-}
+void bst_preorder(bst_node_t *tree, bst_items_t *items) {}
 
 /*
  * Pomocná funkce pro iterativní inorder.
@@ -134,9 +144,7 @@ void bst_preorder(bst_node_t *tree, bst_items_t *items)
  * Funkci implementujte iterativně s pomocí zásobníku a bez použití
  * vlastních pomocných funkcí.
  */
-void bst_leftmost_inorder(bst_node_t *tree, stack_bst_t *to_visit)
-{
-}
+void bst_leftmost_inorder(bst_node_t *tree, stack_bst_t *to_visit) {}
 
 /*
  * Inorder průchod stromem.
@@ -146,8 +154,13 @@ void bst_leftmost_inorder(bst_node_t *tree, stack_bst_t *to_visit)
  * Funkci implementujte iterativně pomocí funkce bst_leftmost_inorder a
  * zásobníku uzlů a bez použití vlastních pomocných funkcí.
  */
-void bst_inorder(bst_node_t *tree, bst_items_t *items)
-{
+void bst_inorder(bst_node_t *tree, bst_items_t *items) {
+  if (tree == NULL)
+    return;
+
+  bst_inorder(tree->left, items);
+  bst_add_node_to_items(tree, items);
+  bst_inorder(tree->right, items);
 }
 
 /*
@@ -157,13 +170,11 @@ void bst_inorder(bst_node_t *tree, bst_items_t *items)
  * zásobníku uzlů. Do zásobníku bool hodnot ukládá informaci, že uzel
  * byl navštíven poprvé.
  *
- * Funkci implementujte iterativně pomocí zásobníku uzlů a bool hodnot a bez použití
- * vlastních pomocných funkcí.
+ * Funkci implementujte iterativně pomocí zásobníku uzlů a bool hodnot a bez
+ * použití vlastních pomocných funkcí.
  */
 void bst_leftmost_postorder(bst_node_t *tree, stack_bst_t *to_visit,
-                            stack_bool_t *first_visit)
-{
-}
+                            stack_bool_t *first_visit) {}
 
 /*
  * Postorder průchod stromem.
@@ -173,6 +184,11 @@ void bst_leftmost_postorder(bst_node_t *tree, stack_bst_t *to_visit,
  * Funkci implementujte iterativně pomocí funkce bst_leftmost_postorder a
  * zásobníku uzlů a bool hodnot a bez použití vlastních pomocných funkcí.
  */
-void bst_postorder(bst_node_t *tree, bst_items_t *items)
-{
+void bst_postorder(bst_node_t *tree, bst_items_t *items) {
+  if (tree == NULL)
+    return;
+
+  bst_postorder(tree->left, items);
+  bst_postorder(tree->right, items);
+  bst_add_node_to_items(tree, items);
 }
