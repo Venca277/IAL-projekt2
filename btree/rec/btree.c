@@ -126,14 +126,16 @@ void bst_delete(bst_node_t **tree, char key) {
     bst_node_t *to_delete = *tree;
     if ((*tree)->left == NULL && (*tree)->right == NULL) {
       *tree = NULL;
+      free(to_delete);
     } else if ((*tree)->left == NULL) {
       *tree = (*tree)->right;
+      free(to_delete);
     } else if ((*tree)->right == NULL) {
       *tree = (*tree)->left;
+      free(to_delete);
     } else {
       bst_replace_by_rightmost(*tree, &((*tree)->left));
     }
-    free(to_delete);
   }
 }
 
@@ -149,6 +151,11 @@ void bst_delete(bst_node_t **tree, char key) {
 void bst_dispose(bst_node_t **tree) {
   if (*tree == NULL)
     return;
+
+  bst_dispose(&((*tree)->left));
+  bst_dispose(&((*tree)->right));
+  free(*tree);
+  *tree = NULL;
 }
 
 /*
@@ -158,7 +165,14 @@ void bst_dispose(bst_node_t **tree) {
  *
  * Funkci implementujte rekurzivně bez použití vlastních pomocných funkcí.
  */
-void bst_preorder(bst_node_t *tree, bst_items_t *items) {}
+void bst_preorder(bst_node_t *tree, bst_items_t *items) {
+  if (tree == NULL)
+    return;
+
+  bst_add_node_to_items(tree, items);
+  bst_preorder(tree->left, items);
+  bst_preorder(tree->right, items);
+}
 
 /*
  * Inorder průchod stromem.
@@ -167,7 +181,14 @@ void bst_preorder(bst_node_t *tree, bst_items_t *items) {}
  *
  * Funkci implementujte rekurzivně bez použití vlastních pomocných funkcí.
  */
-void bst_inorder(bst_node_t *tree, bst_items_t *items) {}
+void bst_inorder(bst_node_t *tree, bst_items_t *items) {
+  if (tree == NULL)
+    return;
+
+  bst_inorder(tree->left, items);
+  bst_add_node_to_items(tree, items);
+  bst_inorder(tree->right, items);
+}
 
 /*
  * Postorder průchod stromem.
@@ -176,4 +197,11 @@ void bst_inorder(bst_node_t *tree, bst_items_t *items) {}
  *
  * Funkci implementujte rekurzivně bez použití vlastních pomocných funkcí.
  */
-void bst_postorder(bst_node_t *tree, bst_items_t *items) {}
+void bst_postorder(bst_node_t *tree, bst_items_t *items) {
+  if (tree == NULL)
+    return;
+
+  bst_postorder(tree->left, items);
+  bst_postorder(tree->right, items);
+  bst_add_node_to_items(tree, items);
+}
